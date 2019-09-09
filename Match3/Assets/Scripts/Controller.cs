@@ -14,17 +14,24 @@ public class Controller : MonoBehaviour
         GridModel = new Model();
         GridModel.CreateGrid(Width, Height);
         GridModel.SetGridPositions();
-        for (int i = 0; i < Width * Height; i++)
+        for (int i = 0; i < Height; i++)
         {
             CheckHorizontalRepeated();
             CheckVerticalRepeated();
         }
         GridView.InitTiles(GridModel.GetGrid(), Width, Height);
     }
-    
-    void Update()
+
+    private void Update()
     {
-        
+        if (Input.GetMouseButtonDown(0))
+        {
+            RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+            
+            if(hit)
+                Debug.Log("Target: " + hit.transform.name);
+            
+        }
     }
 
     void CheckVerticalRepeated()

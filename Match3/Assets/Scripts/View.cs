@@ -6,16 +6,7 @@ public class View : MonoBehaviour
 {
     public GameObject TilePrefab;
     public Sprite[] TileSprite;
-
-    void Start()
-    {
-
-    }
-
-    void Update()
-    {
-        
-    }
+    public GameObject[,] Blocks;
 
     public void InitTiles(int[,] grid, int width, int height)
     {
@@ -27,14 +18,19 @@ public class View : MonoBehaviour
         float GridHeight = CameraUtils.OrthographicBounds().size.y;
         int cant = 0;
 
+        Blocks = new GameObject[width, height];
+
         for (int i = 0; i < width; i++)
         {
             for (int j = 0; j < height; j++)
             {
-                GameObject go = Instantiate(TilePrefab,new Vector2(CameraMinBounds.x + GridWidth / (width - 1) * i + PrefabWidth,
-                                            CameraMinBounds.y + GridHeight / (height - 1) * j + PrefabHeight), Quaternion.identity);
-                go.name = "Tile" + cant;
-                SpriteRenderer TileRenderer = go.GetComponent<SpriteRenderer>();
+                //GameObject go = Instantiate(TilePrefab,new Vector2(CameraMinBounds.x + GridWidth / width * i + PrefabWidth,
+                //                            CameraMinBounds.y + GridHeight / height * j + PrefabHeight), Quaternion.identity);
+                Blocks[i,j]= Instantiate(TilePrefab, new Vector2(CameraMinBounds.x + GridWidth / width * i + PrefabWidth,
+                                            CameraMinBounds.y + GridHeight / height * j + PrefabHeight), Quaternion.identity);
+                Blocks[i, j].name = "Tile" + cant;
+                Blocks[i, j].AddComponent<BoxCollider2D>();
+                SpriteRenderer TileRenderer = Blocks[i, j].GetComponent<SpriteRenderer>();
                 TileRenderer.sprite = TileSprite[grid[i, j]];
                 cant++;
             }
