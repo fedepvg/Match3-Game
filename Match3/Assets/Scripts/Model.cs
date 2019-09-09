@@ -32,4 +32,14 @@ public class Model
     {
         return Grid;
     }
+
+    public int GetValue(int posX, int posY)
+    {
+        return Grid[posX, posY];
+    }
+
+    public void SetValue(int posX,int posY, int value)
+    {
+        Grid[posX, posY] = value;
+    }
 }

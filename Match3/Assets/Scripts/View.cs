@@ -25,15 +25,14 @@ public class View : MonoBehaviour
         float PrefabHeight = TilePrefab.GetComponent<SpriteRenderer>().sprite.bounds.size.x;        
         float GridWidth = CameraUtils.OrthographicBounds().size.x;
         float GridHeight = CameraUtils.OrthographicBounds().size.y;
-        float bound = 0.16f;
         int cant = 0;
 
         for (int i = 0; i < width; i++)
         {
             for (int j = 0; j < height; j++)
             {
-                GameObject go = Instantiate(TilePrefab,new Vector2(CameraMinBounds.x + bound + GridWidth / width * i + PrefabWidth / 2,
-                                            CameraMinBounds.y + bound + GridHeight / height * j + PrefabHeight / 2),Quaternion.identity);
+                GameObject go = Instantiate(TilePrefab,new Vector2(CameraMinBounds.x + GridWidth / (width - 1) * i + PrefabWidth,
+                                            CameraMinBounds.y + GridHeight / (height - 1) * j + PrefabHeight), Quaternion.identity);
                 go.name = "Tile" + cant;
                 SpriteRenderer TileRenderer = go.GetComponent<SpriteRenderer>();
                 TileRenderer.sprite = TileSprite[grid[i, j]];
