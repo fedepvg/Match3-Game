@@ -8,18 +8,30 @@ public class Controller : MonoBehaviour
     public View GridView;
     public int Width;
     public int Height;
+    GameObject[,] Blocks;
+    Vector2Int SelectedPosition;
+    bool IsBlockClicked;
 
     void Start()
     {
         GridModel = new Model();
         GridModel.CreateGrid(Width, Height);
         GridModel.SetGridPositions();
+        Blocks = new GameObject[Width, Height];
+
         for (int i = 0; i < Height; i++)
         {
             CheckHorizontalRepeated();
             CheckVerticalRepeated();
         }
-        GridView.InitTiles(GridModel.GetGrid(), Width, Height);
+
+        for (int i = 0; i < Width; i++)
+        {
+            for (int j = 0; j < Height; j++)
+            {
+                Blocks[i,j] = GridView.GetNewTile(i, j, Width, Height, GridModel.GetValue(i,j));
+            }
+        }
     }
 
     private void Update()
@@ -27,9 +39,11 @@ public class Controller : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
-            
-            if(hit)
-                Debug.Log("Target: " + hit.transform.name);
+
+            if (hit)
+            {
+                GetClickedBlock(hit.transform.gameObject);
+            }
             
         }
     }
@@ -86,6 +100,36 @@ public class Controller : MonoBehaviour
                 }
 
                 lastValue = actualValue;
+            }
+        }
+    }
+
+    public void GetClickedBlock(GameObject Block)
+    {
+        for (int i = 0; i < Width; i++)
+        {
+            for (int j = 0; j < Height; j++)
+            {
+                if (Block == Blocks[i, j])
+                {
+                    if(IsBlockClicked)
+                    {
+                        if(i==SelectedPosition.x - 1 || i == SelectedPosition.x + 1||
+                           j == SelectedPosition.y - 1 || j == SelectedPosition.y + 1)
+                        {
+                            IsBlockClicked = false;
+                            GameObject AuxGO = Block;
+                            Block = Blocks[SelectedPosition.x, SelectedPosition.y];
+                            Blocks[SelectedPosition.x, SelectedPosition.y] = AuxGO;
+                            Debug.Log("swichea");
+                        }
+                    }
+                    else
+                    {
+                        IsBlockClicked = true;
+                        SelectedPosition = new Vector2Int(i, j);
+                    }
+                }
             }
         }
     }
