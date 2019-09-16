@@ -19,4 +19,9 @@ public class View : MonoBehaviour
 
         return Block;
     }
+
+    public void RefreshSprite(ref GameObject Block, int type)
+    {
+        Block.GetComponent<SpriteRenderer>().sprite = TileSprite[type];
+    }
 }

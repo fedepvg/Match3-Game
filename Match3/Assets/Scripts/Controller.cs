@@ -9,7 +9,7 @@ public class Controller : MonoBehaviour
     public int Width;
     public int Height;
     GameObject[,] Blocks;
-    Vector2Int SelectedPosition;
+    Vector2Int LastBlockPos;
     bool IsBlockClicked;
 
     void Start()
@@ -114,20 +114,21 @@ public class Controller : MonoBehaviour
                 {
                     if(IsBlockClicked)
                     {
-                        if(i==SelectedPosition.x - 1 || i == SelectedPosition.x + 1||
-                           j == SelectedPosition.y - 1 || j == SelectedPosition.y + 1)
+                        if(((i == LastBlockPos.x - 1 || i == LastBlockPos.x + 1) && j==LastBlockPos.y) !=
+                           ((j == LastBlockPos.y - 1 || j == LastBlockPos.y + 1) && i==LastBlockPos.x))
                         {
                             IsBlockClicked = false;
-                            GameObject AuxGO = Block;
-                            Block = Blocks[SelectedPosition.x, SelectedPosition.y];
-                            Blocks[SelectedPosition.x, SelectedPosition.y] = AuxGO;
-                            Debug.Log("swichea");
+                            int AuxType = GridModel.GetValue(i, j);
+                            GridModel.SetValue(i, j, GridModel.GetValue(LastBlockPos.x, LastBlockPos.y));
+                            GridModel.SetValue(LastBlockPos.x, LastBlockPos.y, AuxType);
+                            GridView.RefreshSprite(ref Block, GridModel.GetValue(i, j));
+                            GridView.RefreshSprite(ref Blocks[LastBlockPos.x,LastBlockPos.y], GridModel.GetValue(LastBlockPos.x,LastBlockPos.y));
                         }
                     }
                     else
                     {
                         IsBlockClicked = true;
-                        SelectedPosition = new Vector2Int(i, j);
+                        LastBlockPos = new Vector2Int(i, j);
                     }
                 }
             }
