@@ -7,6 +7,7 @@ public class Model
     private int[,] Grid;
     private int Width;
     private int Height;
+    public int Types = 4;
 
     public void CreateGrid(int width, int height)
     {
@@ -22,7 +23,7 @@ public class Model
         {
             for (int j = 0; j < Height; j++)
             {
-                type = Random.Range(0, 4);
+                type = Random.Range(0, Types);
                 Grid[i, j] = type;
             }
         }

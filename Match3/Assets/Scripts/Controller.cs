@@ -20,7 +20,7 @@ public class Controller : MonoBehaviour
         GridModel.SetGridPositions();
         Blocks = new GameObject[Width, Height];
 
-        while (CheckHorizontalRepeated() &&
+        while (CheckHorizontalRepeated() ||
         CheckVerticalRepeated()) ;
 
         for (int i = 0; i < Width; i++)
@@ -65,7 +65,7 @@ public class Controller : MonoBehaviour
                     repeats = true;
                     while (actualValue == lastValue)
                     {
-                        actualValue = Random.Range(0, 4);
+                        actualValue = Random.Range(0, GridModel.Types);
                     }
                     GridModel.SetValue(i, j, actualValue);
                     repeated = 1;
@@ -96,7 +96,7 @@ public class Controller : MonoBehaviour
                     repeats = true;
                     while (actualValue == lastValue)
                     {
-                        actualValue = Random.Range(0, 4);
+                        actualValue = Random.Range(0, GridModel.Types);
                     }
                     GridModel.SetValue(j, i, actualValue);
                     repeated = 1;
@@ -116,22 +116,18 @@ public class Controller : MonoBehaviour
             {
                 if (Block == Blocks[i, j])
                 {
-                    if(IsBlockClicked)
+                    if(IsBlockClicked && IsValidType(GridModel.GetValue(i, j)))
                     {
                         if(((i == LastBlockPos.x - 1 || i == LastBlockPos.x + 1) && j==LastBlockPos.y) !=
                            ((j == LastBlockPos.y - 1 || j == LastBlockPos.y + 1) && i==LastBlockPos.x))
                         {
                             IsBlockClicked = false;
-                            int AuxType = GridModel.GetValue(i, j);
-                            GridModel.SetValue(i, j, GridModel.GetValue(LastBlockPos.x, LastBlockPos.y));
-                            GridModel.SetValue(LastBlockPos.x, LastBlockPos.y, AuxType);
-                            GridView.RefreshSprite(ref Block, GridModel.GetValue(i, j));
-                            GridView.RefreshSprite(ref Blocks[LastBlockPos.x,LastBlockPos.y], GridModel.GetValue(LastBlockPos.x,LastBlockPos.y));
+                            ReplaceValues(i, j, LastBlockPos.x, LastBlockPos.y);
                             CheckMatch(i,j);
                             CheckMatch(LastBlockPos.x, LastBlockPos.y);
                         }
                     }
-                    else
+                    else if(IsValidType(GridModel.GetValue(i, j)))
                     {
                         IsBlockClicked = true;
                         LastBlockPos = new Vector2Int(i, j);
@@ -153,6 +149,8 @@ public class Controller : MonoBehaviour
         for (int i = 0; i < Width; i++)
         {
             actualValue = GridModel.GetValue(i, y);
+            if (actualValue > GridModel.Types)
+                actualValue = -1;
             if (actualValue == lastValue)
             {
                 repeated++;
@@ -219,16 +217,51 @@ public class Controller : MonoBehaviour
                 repeated = 1;
                 matchBreak = false;
             }
-
-            DeleteRepeated(matches, amountOfMatches);
         }
+        DeleteRepeated(matches, amountOfMatches);
     }
 
     void DeleteRepeated(List<Vector2Int> matchesList, int matches)
     {
         for(int i = 0; i < matches; i++)
         {
-            Destroy(Blocks[matchesList[i].x, matchesList[i].y],1);
+            GridModel.SetValue(matchesList[i].x, matchesList[i].y, 5);
+            GridView.RefreshSprite(ref Blocks[matchesList[i].x, matchesList[i].y],GridModel.GetValue(matchesList[i].x, matchesList[i].y));
+            //Destroy(Blocks[matchesList[i].x, matchesList[i].y], 1);
         }
+        
+    }
+    
+    void ReorderGrid()
+    {
+        for (int i = Width; i > 0; i--)
+        {
+            for (int j = 0; j < Height; j++)
+            {
+
+            }
+        }
+
+        for (int i = Height; i > 0; i--)
+        {
+            for (int j = 0; j < Width; j++)
+            {
+
+            }
+        }
+    }
+
+    void ReplaceValues(int firstX, int firstY, int secondX, int secondY)
+    {
+        int AuxType = GridModel.GetValue(firstX, firstY);
+        GridModel.SetValue(firstX, firstY, GridModel.GetValue(secondX, secondY));
+        GridModel.SetValue(secondX, secondY, AuxType);
+        GridView.RefreshSprite(ref Blocks[firstX, firstY], GridModel.GetValue(firstX, firstY));
+        GridView.RefreshSprite(ref Blocks[secondX, secondY], GridModel.GetValue(secondX, secondY));
+    }
+
+    bool IsValidType(int val)
+    {
+        return val <= GridModel.Types && val >= 0;
     }
 }
