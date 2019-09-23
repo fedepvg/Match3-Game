@@ -11,6 +11,7 @@ public class Controller : MonoBehaviour
     GameObject[,] Blocks;
     Vector2Int LastBlockPos;
     bool IsBlockClicked;
+    int Score = 0;
 
     void Start()
     {
@@ -19,11 +20,8 @@ public class Controller : MonoBehaviour
         GridModel.SetGridPositions();
         Blocks = new GameObject[Width, Height];
 
-        for (int i = 0; i < Height; i++)
-        {
-            CheckHorizontalRepeated();
-            CheckVerticalRepeated();
-        }
+        while (CheckHorizontalRepeated() &&
+        CheckVerticalRepeated()) ;
 
         for (int i = 0; i < Width; i++)
         {
@@ -48,11 +46,12 @@ public class Controller : MonoBehaviour
         }
     }
 
-    void CheckVerticalRepeated()
+    bool CheckVerticalRepeated()
     {
         int repeated = 1;
         int lastValue = -1;
         int actualValue;
+        bool repeats = false;
 
         for (int i = 0; i < Width; i++)
         {
@@ -63,6 +62,7 @@ public class Controller : MonoBehaviour
                     repeated++;
                 if (repeated >= 3)
                 {
+                    repeats = true;
                     while (actualValue == lastValue)
                     {
                         actualValue = Random.Range(0, 4);
@@ -74,13 +74,15 @@ public class Controller : MonoBehaviour
                 lastValue = actualValue;
             }
         }
+        return repeats;
     }
 
-    void CheckHorizontalRepeated()
+    bool CheckHorizontalRepeated()
     {
         int repeated = 1;
         int lastValue = -1;
         int actualValue;
+        bool repeats = false;
 
         for (int i = 0; i < Height; i++)
         {
@@ -91,6 +93,7 @@ public class Controller : MonoBehaviour
                     repeated++;
                 if (repeated >= 3)
                 {
+                    repeats = true;
                     while (actualValue == lastValue)
                     {
                         actualValue = Random.Range(0, 4);
@@ -102,6 +105,7 @@ public class Controller : MonoBehaviour
                 lastValue = actualValue;
             }
         }
+        return repeats;
     }
 
     public void GetClickedBlock(GameObject Block)
@@ -123,6 +127,8 @@ public class Controller : MonoBehaviour
                             GridModel.SetValue(LastBlockPos.x, LastBlockPos.y, AuxType);
                             GridView.RefreshSprite(ref Block, GridModel.GetValue(i, j));
                             GridView.RefreshSprite(ref Blocks[LastBlockPos.x,LastBlockPos.y], GridModel.GetValue(LastBlockPos.x,LastBlockPos.y));
+                            CheckMatch(i,j);
+                            CheckMatch(LastBlockPos.x, LastBlockPos.y);
                         }
                     }
                     else
@@ -132,6 +138,97 @@ public class Controller : MonoBehaviour
                     }
                 }
             }
+        }
+    }
+
+    void CheckMatch(int x, int y)
+    {
+        int repeated = 1;
+        int lastValue = -1;
+        int actualValue;
+        bool matchBreak = false;
+        List<Vector2Int> matches = new List<Vector2Int>();
+        int amountOfMatches = 0;
+
+        for (int i = 0; i < Width; i++)
+        {
+            actualValue = GridModel.GetValue(i, y);
+            if (actualValue == lastValue)
+            {
+                repeated++;
+                if (i == Width - 1 && repeated >= 3)
+                    matchBreak = true;
+                else
+                    matchBreak = false;
+            }
+            else if (repeated < 3)
+            {
+                repeated = 1;
+                lastValue = actualValue;
+            }
+            else
+            {
+                matchBreak = true;
+                i--;
+            }
+            if(matchBreak)
+            {
+                for(int j = 0; j < repeated; j++)
+                {
+                    matches.Add(new Vector2Int(i - j, y));
+                    amountOfMatches++;
+                    Score += 10;
+                }
+                repeated = 1;
+                matchBreak = false;
+            }
+        }
+
+        lastValue = -1;
+        repeated = 1;
+
+        for (int i = 0; i < Height; i++)
+        {
+            actualValue = GridModel.GetValue(x, i);
+            if (actualValue == lastValue)
+            {
+                repeated++;
+                if (i == Height - 1 && repeated >= 3)
+                    matchBreak = true;
+                else
+                    matchBreak = false;
+            }
+            else if (repeated < 3)
+            {
+                repeated = 1;
+                lastValue = actualValue;
+            }
+            else
+            {
+                matchBreak = true;
+                i--;
+            }
+            if (matchBreak)
+            {
+                for (int j = 0; j < repeated; j++)
+                {
+                    matches.Add(new Vector2Int(x, i - j));
+                    amountOfMatches++;
+                    Score += 10;
+                }
+                repeated = 1;
+                matchBreak = false;
+            }
+
+            DeleteRepeated(matches, amountOfMatches);
+        }
+    }
+
+    void DeleteRepeated(List<Vector2Int> matchesList, int matches)
+    {
+        for(int i = 0; i < matches; i++)
+        {
+            Destroy(Blocks[matchesList[i].x, matchesList[i].y],1);
         }
     }
 }
