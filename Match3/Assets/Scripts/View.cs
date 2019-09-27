@@ -23,7 +23,10 @@ public class View : MonoBehaviour
     public void RefreshSprite(ref GameObject Block, int type)
     {
         if (type <= 4 && type >= 0)
+        {
             Block.GetComponent<SpriteRenderer>().sprite = TileSprite[type];
+            Block.GetComponent<SpriteRenderer>().color = Color.white;
+        }
         else
         {
             Block.GetComponent<SpriteRenderer>().sprite = TileSprite[0];

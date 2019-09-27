@@ -12,6 +12,7 @@ public class Controller : MonoBehaviour
     Vector2Int LastBlockPos;
     bool IsBlockClicked;
     int Score = 0;
+    const int DestroyedTileValue = 5;
 
     void Start()
     {
@@ -188,6 +189,8 @@ public class Controller : MonoBehaviour
         for (int i = 0; i < Height; i++)
         {
             actualValue = GridModel.GetValue(x, i);
+            if (actualValue > GridModel.Types)
+                actualValue = -1;
             if (actualValue == lastValue)
             {
                 repeated++;
@@ -218,35 +221,54 @@ public class Controller : MonoBehaviour
                 matchBreak = false;
             }
         }
-        DeleteRepeated(matches, amountOfMatches);
+        if(matches.Count > 0)
+            DeleteRepeated(matches, amountOfMatches);
     }
 
     void DeleteRepeated(List<Vector2Int> matchesList, int matches)
     {
         for(int i = 0; i < matches; i++)
         {
-            GridModel.SetValue(matchesList[i].x, matchesList[i].y, 5);
+            GridModel.SetValue(matchesList[i].x, matchesList[i].y, DestroyedTileValue);
             GridView.RefreshSprite(ref Blocks[matchesList[i].x, matchesList[i].y],GridModel.GetValue(matchesList[i].x, matchesList[i].y));
-            //Destroy(Blocks[matchesList[i].x, matchesList[i].y], 1);
         }
-        
+
+        HashSet<int> columnsMatched = new HashSet<int>();
+        foreach (Vector2Int vector in matchesList)
+        {
+            columnsMatched.Add(vector.x);
+        }
+        List<int> columnList = new List<int>(columnsMatched);
+        ReorderGrid(columnList);
     }
     
-    void ReorderGrid()
+    void ReorderGrid(List<int> columnList)
     {
-        for (int i = Width; i > 0; i--)
+        foreach(int col in columnList)
         {
+            bool stillReordering = true;
+            while (stillReordering)
+            {
+                stillReordering = false;
+
+                for (int j = 1; j < Height; j++)
+                {
+                    if (GridModel.GetValue(col, j) == DestroyedTileValue && GridModel.GetValue(col, j - 1) != DestroyedTileValue)
+                    {
+                        ReplaceValues(col, j, col, j - 1);
+                        stillReordering = true;
+                    }
+                }
+            }
+
             for (int j = 0; j < Height; j++)
             {
-
-            }
-        }
-
-        for (int i = Height; i > 0; i--)
-        {
-            for (int j = 0; j < Width; j++)
-            {
-
+                if(GridModel.GetValue(col, j) == DestroyedTileValue)
+                {
+                    GridModel.SetValue(col, j, GridModel.GetRandomValue());
+                    GridView.RefreshSprite(ref Blocks[col, j], GridModel.GetValue(col, j));
+                }
+                Debug.Log(GridModel.GetValue(col, j));
             }
         }
     }

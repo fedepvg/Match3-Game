@@ -23,7 +23,7 @@ public class Model
         {
             for (int j = 0; j < Height; j++)
             {
-                type = Random.Range(0, Types);
+                type = GetRandomValue();
                 Grid[i, j] = type;
             }
         }
@@ -42,5 +42,10 @@ public class Model
     public void SetValue(int posX,int posY, int value)
     {
         Grid[posX, posY] = value;
+    }
+
+    public int GetRandomValue()
+    {
+        return Random.Range(0, Types);
     }
 }
