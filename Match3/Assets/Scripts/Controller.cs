@@ -35,6 +35,7 @@ public class Controller : MonoBehaviour
 
     private void Update()
     {
+#if UNITY_STANDALONE || UNITY_EDITOR
         if (Input.GetMouseButtonDown(0))
         {
             RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
@@ -45,6 +46,46 @@ public class Controller : MonoBehaviour
             }
             
         }
+        else if(Input.GetMouseButtonUp(0))
+        {
+            RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+
+            if (hit)
+            {
+                GetButtonUpBlock(hit.transform.gameObject);
+            }
+            else
+            {
+                IsBlockClicked = false;
+            }
+        }
+#endif
+#if UNITY_ANDROID && !UNITY_EDITOR
+        if (Input.touchCount > 0)
+        {
+            Touch touch = Input.GetTouch(0);
+
+            RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(touch.position), Vector2.zero);
+
+            if (hit)
+            {
+                switch(touch.phase)
+                {
+                    case TouchPhase.Began:
+                        GetClickedBlock(hit.transform.gameObject);
+                        break;
+                    case TouchPhase.Ended:
+                        GetButtonUpBlock(hit.transform.gameObject);
+                        break;
+                    default:
+                        IsBlockClicked = false;
+                        break;
+                }
+                
+            }
+
+        }
+#endif
     }
 
     bool CheckVerticalRepeated()
@@ -117,18 +158,7 @@ public class Controller : MonoBehaviour
             {
                 if (Block == Blocks[i, j])
                 {
-                    if(IsBlockClicked && IsValidType(GridModel.GetValue(i, j)))
-                    {
-                        if(((i == LastBlockPos.x - 1 || i == LastBlockPos.x + 1) && j==LastBlockPos.y) !=
-                           ((j == LastBlockPos.y - 1 || j == LastBlockPos.y + 1) && i==LastBlockPos.x))
-                        {
-                            IsBlockClicked = false;
-                            ReplaceValues(i, j, LastBlockPos.x, LastBlockPos.y);
-                            CheckMatch(i,j);
-                            CheckMatch(LastBlockPos.x, LastBlockPos.y);
-                        }
-                    }
-                    else if(IsValidType(GridModel.GetValue(i, j)))
+                    if(IsValidType(GridModel.GetValue(i, j)))
                     {
                         IsBlockClicked = true;
                         LastBlockPos = new Vector2Int(i, j);
@@ -136,6 +166,32 @@ public class Controller : MonoBehaviour
                 }
             }
         }
+    }
+
+    public void GetButtonUpBlock(GameObject Block)
+    {
+        for (int i = 0; i < Width; i++)
+        {
+            for (int j = 0; j < Height; j++)
+            {
+                if (Block == Blocks[i, j])
+                {
+                    if (IsBlockClicked && IsValidType(GridModel.GetValue(i, j)))
+                    {
+                        if (((i == LastBlockPos.x - 1 || i == LastBlockPos.x + 1) && j == LastBlockPos.y) !=
+                           ((j == LastBlockPos.y - 1 || j == LastBlockPos.y + 1) && i == LastBlockPos.x))
+                        {
+                            IsBlockClicked = false;
+                            ReplaceValues(i, j, LastBlockPos.x, LastBlockPos.y);
+                            CheckMatch(i, j);
+                            CheckMatch(LastBlockPos.x, LastBlockPos.y);
+                        }
+                    }
+                }
+            }
+        }
+
+        IsBlockClicked = false;
     }
 
     void CheckMatch(int x, int y)
@@ -268,7 +324,6 @@ public class Controller : MonoBehaviour
                     GridModel.SetValue(col, j, GridModel.GetRandomValue());
                     GridView.RefreshSprite(ref Blocks[col, j], GridModel.GetValue(col, j));
                 }
-                Debug.Log(GridModel.GetValue(col, j));
             }
         }
     }
