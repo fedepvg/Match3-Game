@@ -244,7 +244,7 @@ PlayerSettings:
   AndroidTargetArchitectures: 3
   AndroidSplashScreenScale: 0
   androidSplashScreen: {fileID: 0}
-  AndroidKeystoreName: C:/Users/Administrador/Desktop/Match3-Game/Match3/DVM-vanGelderen.keystore
+  AndroidKeystoreName: D:/Contenido_Image/2A2C/Moviles/Match3-Game/Match3/DVM-vanGelderen.keystore
   AndroidKeyaliasName: fede
   AndroidBuildApkPerCpuArchitecture: 0
   AndroidTVCompatibility: 1
