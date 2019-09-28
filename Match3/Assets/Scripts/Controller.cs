@@ -32,7 +32,7 @@ public class Controller : MonoBehaviour
         {
             for (int j = 0; j < Height; j++)
             {
-                Blocks[i,j] = GridView.GetNewTile(i, j, Width, Height, GridModel.GetValue(i,j));
+                Blocks[i, j] = GridView.GetNewTile(i, j, Width, Height, GridModel.GetValue(i, j));
             }
         }
     }
@@ -48,9 +48,9 @@ public class Controller : MonoBehaviour
             {
                 GetClickedBlock(hit.transform.gameObject);
             }
-            
+
         }
-        else if(Input.GetMouseButtonUp(0) && !Processing)
+        else if (Input.GetMouseButtonUp(0) && !Processing)
         {
             RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
 
@@ -162,7 +162,7 @@ public class Controller : MonoBehaviour
             {
                 if (Block == Blocks[i, j])
                 {
-                    if(IsValidType(GridModel.GetValue(i, j)))
+                    if (IsValidType(GridModel.GetValue(i, j)))
                     {
                         IsBlockClicked = true;
                         LastBlockPos = new Vector2Int(i, j);
@@ -186,16 +186,18 @@ public class Controller : MonoBehaviour
                            ((j == LastBlockPos.y - 1 || j == LastBlockPos.y + 1) && i == LastBlockPos.x))
                         {
                             IsBlockClicked = false;
-                            ReplaceValues(i, j, LastBlockPos.x, LastBlockPos.y);
-                            CheckHorizontalMatch(i);
-                            if(i!=LastBlockPos.x)
-                                CheckHorizontalMatch(LastBlockPos.x);
-                            CheckVerticalMatch(j);
+                            StartCoroutine(ReplaceValues(i, j, LastBlockPos.x, LastBlockPos.y, 0f));
+                            CheckHorizontalMatch(j);
                             if (j != LastBlockPos.y)
-                                CheckVerticalMatch(LastBlockPos.y);
+                                CheckHorizontalMatch(LastBlockPos.y);
+                            CheckVerticalMatch(i);
+                            if (i != LastBlockPos.x)
+                                CheckVerticalMatch(LastBlockPos.x);
+                            Debug.Log(MatchesCount);
                             if (MatchesCount > 0)
                                 StartCoroutine(DeleteRepeated());
-                            
+                            else
+                                StartCoroutine(ReplaceValues(i, j, LastBlockPos.x, LastBlockPos.y, 0.5f));
                         }
                     }
                 }
@@ -237,9 +239,9 @@ public class Controller : MonoBehaviour
                 matchBreak = true;
                 i--;
             }
-            if(matchBreak)
+            if (matchBreak)
             {
-                for(int j = 0; j < repeated; j++)
+                for (int j = 0; j < repeated; j++)
                 {
                     matches.Add(new Vector2Int(i - j, y));
                     amountOfMatches++;
@@ -290,7 +292,7 @@ public class Controller : MonoBehaviour
         }
     }
 
-    void CheckHorizontalMatch(int x)
+    void CheckVerticalMatch(int x)
     {
         int repeated = 1;
         int lastValue = -1;
@@ -334,7 +336,7 @@ public class Controller : MonoBehaviour
         }
     }
 
-    void CheckVerticalMatch(int y)
+    void CheckHorizontalMatch(int y)
     {
         int repeated = 1;
         int lastValue = -1;
@@ -380,21 +382,36 @@ public class Controller : MonoBehaviour
 
     void CheckAllGridMatches()
     {
-
-    }
-
-    void ReplaceValues(int firstX, int firstY, int secondX, int secondY)
-    {
-        int AuxType = GridModel.GetValue(firstX, firstY);
-        GridModel.SetValue(firstX, firstY, GridModel.GetValue(secondX, secondY));
-        GridModel.SetValue(secondX, secondY, AuxType);
-        GridView.RefreshSprite(ref Blocks[firstX, firstY], GridModel.GetValue(firstX, firstY));
-        GridView.RefreshSprite(ref Blocks[secondX, secondY], GridModel.GetValue(secondX, secondY));
+        for (int i = 0; i < Width; i++)
+        {
+            CheckVerticalMatch(i);
+        }
+        for (int i = 0; i < Height; i++)
+        {
+            CheckHorizontalMatch(i);
+        }
+        if (MatchesCount > 0)
+            StartCoroutine(DeleteRepeated());
     }
 
     bool IsValidType(int val)
     {
         return val <= GridModel.Types && val >= 0;
+    }
+
+    IEnumerator ReplaceValues(int firstX, int firstY, int secondX, int secondY, float delay)
+    {
+        Processing = true;
+
+        if (delay > 0f)
+            yield return new WaitForSeconds(delay);
+
+        int AuxType = GridModel.GetValue(firstX, firstY);
+        GridModel.SetValue(firstX, firstY, GridModel.GetValue(secondX, secondY));
+        GridModel.SetValue(secondX, secondY, AuxType);
+        GridView.RefreshSprite(ref Blocks[firstX, firstY], GridModel.GetValue(firstX, firstY));
+        GridView.RefreshSprite(ref Blocks[secondX, secondY], GridModel.GetValue(secondX, secondY));
+        Processing = false;
     }
 
     IEnumerator DeleteRepeated()
@@ -434,7 +451,7 @@ public class Controller : MonoBehaviour
                 {
                     if (GridModel.GetValue(col, j) == DestroyedTileValue && GridModel.GetValue(col, j - 1) != DestroyedTileValue)
                     {
-                        ReplaceValues(col, j, col, j - 1);
+                        StartCoroutine(ReplaceValues(col, j, col, j - 1, 0f));
                         stillReordering = true;
                     }
                 }
@@ -450,5 +467,6 @@ public class Controller : MonoBehaviour
             }
         }
         Processing = false;
+        CheckAllGridMatches();
     }
 }
