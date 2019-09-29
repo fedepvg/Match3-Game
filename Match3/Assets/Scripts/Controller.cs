@@ -47,6 +47,7 @@ public class Controller : MonoBehaviour
 
             if (hit)
             {
+                hit.transform.GetComponent<SpriteRenderer>().color = Color.gray;
                 GetClickedBlock(hit.transform.gameObject);
             }
 
@@ -77,6 +78,7 @@ public class Controller : MonoBehaviour
                 switch(touch.phase)
                 {
                     case TouchPhase.Began:
+                       hit.transform.GetComponent<SpriteRenderer>().color = Color.gray;
                         GetClickedBlock(hit.transform.gameObject);
                         break;
                     case TouchPhase.Ended:

@@ -15,8 +15,8 @@ public class View : MonoBehaviour
         Grid = new GameObject();
         Grid.transform.position = Vector3.zero;
         Grid.name = "Grid";
-        PrefabWidth = TilePrefab.GetComponent<SpriteRenderer>().sprite.bounds.size.x;
-        PrefabHeight = TilePrefab.GetComponent<SpriteRenderer>().sprite.bounds.size.x;
+        PrefabWidth = TilePrefab.GetComponent<SpriteRenderer>().bounds.size.x;
+        PrefabHeight = TilePrefab.GetComponent<SpriteRenderer>().bounds.size.y;
     }
 
     public GameObject GetNewTile(int GridXPos, int GridYPos, int GridWidth, int GridHeight, int BlockType)
@@ -26,7 +26,7 @@ public class View : MonoBehaviour
         Block.AddComponent<BoxCollider2D>();
         SpriteRenderer TileRenderer = Block.GetComponent<SpriteRenderer>();
         TileRenderer.sprite = TileSprite[BlockType];
-        Block.transform.position = new Vector2(PrefabWidth * GridXPos + PrefabWidth / 2 * GridXPos, PrefabHeight * GridYPos * -1 - PrefabHeight / 2 * GridYPos);
+        Block.transform.position = new Vector2(PrefabWidth * GridXPos + PrefabWidth * 0.25f * GridXPos, PrefabHeight * GridYPos * -1 - PrefabHeight * 0.25f * GridYPos);
 
         return Block;
     }
