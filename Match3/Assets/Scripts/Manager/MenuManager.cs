@@ -3,15 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using GooglePlayGames;
+using GooglePlayGames.BasicApi;
 using UnityEngine.SocialPlatforms;
 using UnityEngine.UI;
 
-public class UIMenuManager : MonoBehaviour
+public class MenuManager : MonoBehaviour
 {
     public Text LogResult;
 
     public void LogIn()
     {
+#if UNITY_ANDROID && !UNITY_EDITOR
         Social.localUser.Authenticate((bool success) => 
         {
             if (success)
@@ -19,16 +21,22 @@ public class UIMenuManager : MonoBehaviour
             else
                 ShowLogResult("Couldn't Log In");
         });
+#endif
     }
 
     public void LogOut()
     {
+#if UNITY_ANDROID && !UNITY_EDITOR
         PlayGamesPlatform.Instance.SignOut();
         ShowLogResult("Logged Out");
+#endif
     }
 
     public void GoToGameplayScene()
     {
+#if UNITY_ANDROID && !UNITY_EDITOR
+        GPSManager.Instance.UnlockAchievement();
+#endif
         SceneManager.LoadScene(1);
     }
 

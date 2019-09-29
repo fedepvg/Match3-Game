@@ -236,91 +236,6 @@ public class Controller : MonoBehaviour
         IsBlockClicked = false;
     }
 
-    void CheckMatch(int x, int y)
-    {
-        int repeated = 1;
-        int lastValue = -1;
-        int actualValue;
-        bool matchBreak = false;
-        List<Vector2Int> matches = new List<Vector2Int>();
-        int amountOfMatches = 0;
-
-        for (int i = 0; i < Width; i++)
-        {
-            actualValue = GridModel.GetValue(i, y);
-            if (actualValue > GridModel.Types)
-                actualValue = -1;
-            if (actualValue == lastValue)
-            {
-                repeated++;
-                if (i == Width - 1 && repeated >= 3)
-                    matchBreak = true;
-                else
-                    matchBreak = false;
-            }
-            else if (repeated < 3)
-            {
-                repeated = 1;
-                lastValue = actualValue;
-            }
-            else
-            {
-                matchBreak = true;
-                i--;
-            }
-            if (matchBreak)
-            {
-                for (int j = 0; j < repeated; j++)
-                {
-                    matches.Add(new Vector2Int(i - j, y));
-                    amountOfMatches++;
-                    Score += 10;
-                }
-                repeated = 1;
-                matchBreak = false;
-            }
-        }
-
-        lastValue = -1;
-        repeated = 1;
-
-        for (int i = 0; i < Height; i++)
-        {
-            actualValue = GridModel.GetValue(x, i);
-            if (actualValue > GridModel.Types)
-                actualValue = -1;
-            if (actualValue == lastValue)
-            {
-                repeated++;
-                if (i == Height - 1 && repeated >= 3)
-                    matchBreak = true;
-                else
-                    matchBreak = false;
-            }
-            else if (repeated < 3)
-            {
-                repeated = 1;
-                lastValue = actualValue;
-            }
-            else
-            {
-                matchBreak = true;
-                i--;
-            }
-            if (matchBreak)
-            {
-                for (int j = 0; j < repeated; j++)
-                {
-                    matches.Add(new Vector2Int(x, i - j));
-                    amountOfMatches++;
-                    Score += 10;
-                }
-                repeated = 1;
-                matchBreak = false;
-            }
-        }
-    }
-
     void CheckVerticalMatch(int x)
     {
         int repeated = 1;
@@ -357,7 +272,7 @@ public class Controller : MonoBehaviour
                 {
                     matches.Add(new Vector2Int(x, i - j));
                     MatchesCount++;
-                    Score += 10;
+                    Score += 10 * (j + 1);
                 }
                 repeated = 1;
                 matchBreak = false;
@@ -401,7 +316,7 @@ public class Controller : MonoBehaviour
                 {
                     matches.Add(new Vector2Int(i - j, y));
                     MatchesCount++;
-                    Score += 10;
+                    Score += 10 * (j + 1);
                 }
                 repeated = 1;
                 matchBreak = false;
@@ -426,6 +341,11 @@ public class Controller : MonoBehaviour
     bool IsValidType(int val)
     {
         return val <= GridModel.Types && val >= 0;
+    }
+
+    public int GetScore()
+    {
+        return Score;
     }
 
     IEnumerator ReplaceValues(int firstX, int firstY, int secondX, int secondY, float delay)

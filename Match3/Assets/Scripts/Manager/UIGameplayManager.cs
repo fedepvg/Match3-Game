@@ -9,9 +9,30 @@ public class UIGameplayManager : MonoBehaviour
     public GameObject PauseButton;
     public GameObject PausePanel;
     public Controller GameController;
+    public Text ScoreText;
+    int LastScore;
+
+    private void Start()
+    {
+        ScoreText.text = "0";
+    }
+
+    private void Update()
+    {
+        int score = GameController.GetScore();
+        if(score!=LastScore)
+        {
+            LastScore = score;
+            ScoreText.text = LastScore.ToString();
+        }
+    }
 
     public void GoToMenu()
     {
+#if UNITY_ANDROID && !UNITY_EDITOR
+        GPSManager.Instance.UploadScore(GameController.GetScore());
+        GPSManager.Instance.ShowLeaderboard();
+#endif
         SceneManager.LoadScene(0);
     }
 
