@@ -16,6 +16,7 @@ public class Controller : MonoBehaviour
     List<Vector2Int> matches = new List<Vector2Int>();
     int MatchesCount = 0;
     bool Processing;
+    bool OnPause;
 
     void Start()
     {
@@ -24,6 +25,7 @@ public class Controller : MonoBehaviour
         GridModel.SetGridPositions();
         Blocks = new GameObject[Width, Height];
         Processing = false;
+        OnPause = false;
 
         while (CheckHorizontalRepeated() ||
         CheckVerticalRepeated()) ;
@@ -40,70 +42,83 @@ public class Controller : MonoBehaviour
 
     private void Update()
     {
+        if (!OnPause)
+        {
 #if UNITY_STANDALONE || UNITY_EDITOR
-        if (Input.GetMouseButtonDown(0) && !Processing)
-        {
-            RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
-
-            if (hit)
+            if (Input.GetMouseButtonDown(0) && !Processing)
             {
-                hit.transform.GetComponent<SpriteRenderer>().color = Color.gray;
-                GetClickedBlock(hit.transform.gameObject);
-            }
+                RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
 
-        }
-        else if (Input.GetMouseButtonUp(0) && !Processing)
-        {
-            RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
-
-            if (hit)
-            {
-                GetButtonUpBlock(hit.transform.gameObject);
-            }
-            else
-            {
-                Blocks[LastBlockPos.x, LastBlockPos.y].GetComponent<SpriteRenderer>().color = Color.white;
-                IsBlockClicked = false;
-            }
-        }
-#endif
-#if UNITY_ANDROID && !UNITY_EDITOR
-        if (Input.touchCount > 0  && !Processing)
-        {
-            Touch touch = Input.GetTouch(0);
-
-            RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(touch.position), Vector2.zero);
-
-            if (hit)
-            {
-                switch(touch.phase)
+                if (hit)
                 {
-                    case TouchPhase.Began:
-                        hit.transform.GetComponent<SpriteRenderer>().color = Color.gray;
-                        GetClickedBlock(hit.transform.gameObject);
-                        break;
-                    case TouchPhase.Ended:
-                        Blocks[LastBlockPos.x, LastBlockPos.y].GetComponent<SpriteRenderer>().color = Color.white;
-                        GetButtonUpBlock(hit.transform.gameObject);
-                        break;
-                    case TouchPhase.Canceled:
-                        Blocks[LastBlockPos.x, LastBlockPos.y].GetComponent<SpriteRenderer>().color = Color.white;
-                        GetButtonUpBlock(hit.transform.gameObject);
-                        break;
-                    default:
-                        break;
-                }    
+                    hit.transform.GetComponent<SpriteRenderer>().color = Color.gray;
+                    GetClickedBlock(hit.transform.gameObject);
+                }
+
             }
-            else
+            else if (Input.GetMouseButtonUp(0) && !Processing)
             {
-                if (touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled)
+                RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+
+                if (hit)
+                {
+                    GetButtonUpBlock(hit.transform.gameObject);
+                }
+                else
                 {
                     Blocks[LastBlockPos.x, LastBlockPos.y].GetComponent<SpriteRenderer>().color = Color.white;
                     IsBlockClicked = false;
                 }
             }
-        }
 #endif
+#if UNITY_ANDROID && !UNITY_EDITOR
+            if (Input.touchCount > 0  && !Processing)
+            {
+                Touch touch = Input.GetTouch(0);
+
+                RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(touch.position), Vector2.zero);
+
+                if (hit)
+                {
+                    switch(touch.phase)
+                    {
+                        case TouchPhase.Began:
+                            hit.transform.GetComponent<SpriteRenderer>().color = Color.gray;
+                            GetClickedBlock(hit.transform.gameObject);
+                            break;
+                        case TouchPhase.Ended:
+                            Blocks[LastBlockPos.x, LastBlockPos.y].GetComponent<SpriteRenderer>().color = Color.white;
+                            GetButtonUpBlock(hit.transform.gameObject);
+                            break;
+                        case TouchPhase.Canceled:
+                            Blocks[LastBlockPos.x, LastBlockPos.y].GetComponent<SpriteRenderer>().color = Color.white;
+                            GetButtonUpBlock(hit.transform.gameObject);
+                            break;
+                        default:
+                            break;
+                    }    
+                }
+                else
+                {
+                    if (touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled)
+                    {
+                        Blocks[LastBlockPos.x, LastBlockPos.y].GetComponent<SpriteRenderer>().color = Color.white;
+                        IsBlockClicked = false;
+                    }
+                }
+            }
+#endif
+        }
+    }
+
+    public void Pause()
+    {
+        OnPause = true;
+    }
+
+    public void Unpause()
+    {
+        OnPause = false;
     }
 
     bool CheckVerticalRepeated()
