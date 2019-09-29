@@ -7,6 +7,8 @@ using UnityEngine.SocialPlatforms;
 
 public class GPSManager : MonoBehaviourSingleton<GPSManager>
 {
+    bool LoggedIn;
+
     private void Start()
     {
         InitializeGooglePlayServices();
@@ -21,27 +23,47 @@ public class GPSManager : MonoBehaviourSingleton<GPSManager>
 
     public void ShowAchievements()
     {
-        Social.ShowAchievementsUI();
+        if(LoggedIn)
+            Social.ShowAchievementsUI();
     }
 
     public void ShowLeaderboard()
     {
-        PlayGamesPlatform.Instance.ShowLeaderboardUI(GPGSIds.leaderboard_highscore);
+        if(LoggedIn)
+            PlayGamesPlatform.Instance.ShowLeaderboardUI(GPGSIds.leaderboard_highscore);
     }
 
     public void UploadScore(int score)
     {
-        Social.ReportScore(score, GPGSIds.leaderboard_highscore, (bool success) => {
-            if (success)
-                ShowLeaderboard();
-        });
+        if (LoggedIn)
+        {
+            Social.ReportScore(score, GPGSIds.leaderboard_highscore, (bool success) =>
+            {
+                if (success)
+                    ShowLeaderboard();
+            });
+        }
     }
 
     public void UnlockAchievement()
     {
-        Social.ReportProgress(GPGSIds.achievement_campen_mundial_de_match3, 100.0f, (bool success) => {
-            if (success)
-                ShowAchievements();
-        });
+        if (LoggedIn)
+        {
+            Social.ReportProgress(GPGSIds.achievement_campen_mundial_de_match3, 100.0f, (bool success) =>
+            {
+                if (success)
+                    ShowAchievements();
+            });
+        }
+    }
+
+    public void SetLoggedIn(bool log)
+    {
+        LoggedIn = log;
+    }
+
+    public bool GetLoggedIn()
+    {
+        return LoggedIn;
     }
 }

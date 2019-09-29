@@ -35,7 +35,7 @@ public class View : MonoBehaviour
     {
         float GridWidth = GridColumns * PrefabWidth;
         float GridHeight = GridRows * PrefabHeight;
-        Grid.transform.position = new Vector2(-GridWidth / 2 + PrefabWidth / 2, GridHeight / 2 + PrefabHeight / 2); 
+        Grid.transform.position = new Vector2(-GridWidth / 2, GridHeight / 2 + PrefabHeight / 2); 
     }
 
     public void RefreshSprite(ref GameObject Block, int type)

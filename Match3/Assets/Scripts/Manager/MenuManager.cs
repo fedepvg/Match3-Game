@@ -17,7 +17,10 @@ public class MenuManager : MonoBehaviour
         Social.localUser.Authenticate((bool success) => 
         {
             if (success)
+            {
                 ShowLogResult("Logged In");
+                GPSManager.Instance.SetLoggedIn(true);
+            }
             else
                 ShowLogResult("Couldn't Log In");
         });
@@ -27,8 +30,15 @@ public class MenuManager : MonoBehaviour
     public void LogOut()
     {
 #if UNITY_ANDROID && !UNITY_EDITOR
-        PlayGamesPlatform.Instance.SignOut();
-        ShowLogResult("Logged Out");
+        if (GPSManager.Instance.GetLoggedIn())
+        {
+            PlayGamesPlatform.Instance.SignOut();
+            ShowLogResult("Logged Out");
+        }
+        else
+        {
+            ShowLogResult("Not Logged in");
+        }
 #endif
     }
 
@@ -57,4 +67,21 @@ public class MenuManager : MonoBehaviour
     {
         LogResult.gameObject.SetActive(false);
     }
+
+    public void OpenLeaderboard()
+    {
+#if UNITY_ANDROID && !UNITY_EDITOR
+        GPSManager.Instance.ShowLeaderboard();
+#endif
+    }
+
+    public void QuitGame()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit ();
+#endif
+    }
+
 }
