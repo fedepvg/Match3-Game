@@ -62,6 +62,7 @@ public class Controller : MonoBehaviour
             }
             else
             {
+                Blocks[LastBlockPos.x, LastBlockPos.y].GetComponent<SpriteRenderer>().color = Color.white;
                 IsBlockClicked = false;
             }
         }
@@ -78,19 +79,29 @@ public class Controller : MonoBehaviour
                 switch(touch.phase)
                 {
                     case TouchPhase.Began:
-                       hit.transform.GetComponent<SpriteRenderer>().color = Color.gray;
+                        hit.transform.GetComponent<SpriteRenderer>().color = Color.gray;
                         GetClickedBlock(hit.transform.gameObject);
                         break;
                     case TouchPhase.Ended:
+                        Blocks[LastBlockPos.x, LastBlockPos.y].GetComponent<SpriteRenderer>().color = Color.white;
+                        GetButtonUpBlock(hit.transform.gameObject);
+                        break;
+                    case TouchPhase.Canceled:
+                        Blocks[LastBlockPos.x, LastBlockPos.y].GetComponent<SpriteRenderer>().color = Color.white;
                         GetButtonUpBlock(hit.transform.gameObject);
                         break;
                     default:
-                        IsBlockClicked = false;
                         break;
-                }
-                
+                }    
             }
-
+            else
+            {
+                if (touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled)
+                {
+                    Blocks[LastBlockPos.x, LastBlockPos.y].GetComponent<SpriteRenderer>().color = Color.white;
+                    IsBlockClicked = false;
+                }
+            }
         }
 #endif
     }
