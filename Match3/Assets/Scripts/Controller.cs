@@ -35,6 +35,7 @@ public class Controller : MonoBehaviour
                 Blocks[i, j] = GridView.GetNewTile(i, j, Width, Height, GridModel.GetValue(i, j));
             }
         }
+        GridView.AlignGrid(Width, Height);
     }
 
     private void Update()

@@ -6,18 +6,36 @@ public class View : MonoBehaviour
 {
     public GameObject TilePrefab;
     public Sprite[] TileSprite;
+    GameObject Grid;
+    float PrefabWidth;
+    float PrefabHeight;
+
+    private void Start()
+    {
+        Grid = new GameObject();
+        Grid.transform.position = Vector3.zero;
+        Grid.name = "Grid";
+        PrefabWidth = TilePrefab.GetComponent<SpriteRenderer>().sprite.bounds.size.x;
+        PrefabHeight = TilePrefab.GetComponent<SpriteRenderer>().sprite.bounds.size.x;
+    }
 
     public GameObject GetNewTile(int GridXPos, int GridYPos, int GridWidth, int GridHeight, int BlockType)
     {
-        float PrefabWidth = TilePrefab.GetComponent<SpriteRenderer>().sprite.bounds.size.x;
-        float PrefabHeight = TilePrefab.GetComponent<SpriteRenderer>().sprite.bounds.size.x;        
-        GameObject Block = Instantiate(TilePrefab,new Vector2(PrefabWidth * GridXPos, PrefabHeight * GridYPos * -1), Quaternion.identity);
-        Block.name = "Tile";
+        GameObject Block = Instantiate(TilePrefab, Grid.transform);
+        Block.name = GridXPos + " , " + GridYPos;
         Block.AddComponent<BoxCollider2D>();
         SpriteRenderer TileRenderer = Block.GetComponent<SpriteRenderer>();
         TileRenderer.sprite = TileSprite[BlockType];
+        Block.transform.position = new Vector2(PrefabWidth * GridXPos + PrefabWidth / 2 * GridXPos, PrefabHeight * GridYPos * -1 - PrefabHeight / 2 * GridYPos);
 
         return Block;
+    }
+
+    public void AlignGrid(int GridColumns, int GridRows)
+    {
+        float GridWidth = GridColumns * PrefabWidth;
+        float GridHeight = GridRows * PrefabHeight;
+        Grid.transform.position = new Vector2(-GridWidth / 2 + PrefabWidth / 2, GridHeight / 2 + PrefabHeight / 2); 
     }
 
     public void RefreshSprite(ref GameObject Block, int type)
