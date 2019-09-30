@@ -19,6 +19,7 @@ public class Controller : MonoBehaviour
     bool OnPause;
     Vector2Int DestBlock;
     bool ValidDestBlock;
+    Vector2[,] Positions;
 
     void Start()
     {
@@ -26,6 +27,7 @@ public class Controller : MonoBehaviour
         GridModel.CreateGrid(Width, Height);
         GridModel.SetGridPositions();
         Blocks = new GameObject[Width, Height];
+        Positions = new Vector2[Width, Height];
         Processing = false;
         OnPause = false;
         ValidDestBlock = false;
@@ -40,6 +42,15 @@ public class Controller : MonoBehaviour
                 Blocks[i, j] = GridView.GetNewTile(i, j, Width, Height, GridModel.GetValue(i, j));
             }
         }
+
+        for (int i = 0; i < Width; i++)
+        {
+            for (int j = 0; j < Height; j++)
+            {
+                Positions[i, j] = Blocks[i, j].transform.localPosition;
+            }
+        }
+
         GridView.AlignGrid(Width, Height);
     }
 
@@ -379,11 +390,31 @@ public class Controller : MonoBehaviour
         if (delay > 0f)
             yield return new WaitForSeconds(delay);
 
+        if (Blocks[firstX, firstY])
+        {
+            Blocks[firstX, firstY].transform.localPosition = Positions[secondX, secondY];
+        }
+        if (Blocks[secondX,secondY])
+            Blocks[secondX, secondY].transform.localPosition = Positions[firstX, firstY];
+
+        GameObject auxGo = Blocks[firstX, firstY];
+        Blocks[firstX, firstY] = Blocks[secondX, secondY];
+        Blocks[secondX, secondY] = auxGo;
+
         int AuxType = GridModel.GetValue(firstX, firstY);
         GridModel.SetValue(firstX, firstY, GridModel.GetValue(secondX, secondY));
         GridModel.SetValue(secondX, secondY, AuxType);
-        GridView.RefreshSprite(ref Blocks[firstX, firstY], GridModel.GetValue(firstX, firstY));
-        GridView.RefreshSprite(ref Blocks[secondX, secondY], GridModel.GetValue(secondX, secondY));
+
+
+
+        //GridView.RefreshSprite(ref Blocks[firstX, firstY], GridModel.GetValue(firstX, firstY));
+        //GridView.RefreshSprite(ref Blocks[secondX, secondY], GridModel.GetValue(secondX, secondY));
+
+        //int AuxType = GridModel.GetValue(firstX, firstY);
+        //GridModel.SetValue(firstX, firstY, GridModel.GetValue(secondX, secondY));
+        //GridModel.SetValue(secondX, secondY, AuxType);
+        //GridView.RefreshSprite(ref Blocks[firstX, firstY], GridModel.GetValue(firstX, firstY));
+        //GridView.RefreshSprite(ref Blocks[secondX, secondY], GridModel.GetValue(secondX, secondY));
         Processing = false;
     }
 
@@ -394,8 +425,10 @@ public class Controller : MonoBehaviour
 
         for (int i = 0; i < MatchesCount; i++)
         {
-            GridModel.SetValue(matches[i].x, matches[i].y, DestroyedTileValue);
-            GridView.RefreshSprite(ref Blocks[matches[i].x, matches[i].y], GridModel.GetValue(matches[i].x, matches[i].y));
+            Destroy(Blocks[matches[i].x, matches[i].y]);
+            Blocks[matches[i].x, matches[i].y] = null;
+            //GridModel.SetValue(matches[i].x, matches[i].y, DestroyedTileValue);
+            //GridView.RefreshSprite(ref Blocks[matches[i].x, matches[i].y], GridModel.GetValue(matches[i].x, matches[i].y));
         }
 
         HashSet<int> columnsMatched = new HashSet<int>();
@@ -422,7 +455,7 @@ public class Controller : MonoBehaviour
 
                 for (int j = 1; j < Height; j++)
                 {
-                    if (GridModel.GetValue(col, j) == DestroyedTileValue && GridModel.GetValue(col, j - 1) != DestroyedTileValue)
+                    if (Blocks[col, j] == null && Blocks[col, j - 1] != null)
                     {
                         StartCoroutine(ReplaceValues(col, j, col, j - 1, 0f));
                         stillReordering = true;
@@ -432,9 +465,11 @@ public class Controller : MonoBehaviour
 
             for (int j = 0; j < Height; j++)
             {
-                if (GridModel.GetValue(col, j) == DestroyedTileValue)
+                if (Blocks[col, j] == null)
                 {
                     GridModel.SetValue(col, j, GridModel.GetRandomValue());
+                    Blocks[col, j] = GridView.GetNewTile(col, j, Width, Height, GridModel.GetValue(col, j));
+                    Blocks[col, j].transform.localPosition = Positions[col, j];
                     GridView.RefreshSprite(ref Blocks[col, j], GridModel.GetValue(col, j));
                 }
             }
