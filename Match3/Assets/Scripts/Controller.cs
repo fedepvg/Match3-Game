@@ -17,6 +17,8 @@ public class Controller : MonoBehaviour
     int MatchesCount = 0;
     bool Processing;
     bool OnPause;
+    Vector2Int DestBlock;
+    bool ValidDestBlock;
 
     void Start()
     {
@@ -26,6 +28,7 @@ public class Controller : MonoBehaviour
         Blocks = new GameObject[Width, Height];
         Processing = false;
         OnPause = false;
+        ValidDestBlock = false;
 
         while (CheckHorizontalRepeated() ||
         CheckVerticalRepeated()) ;
@@ -45,30 +48,32 @@ public class Controller : MonoBehaviour
         if (!OnPause)
         {
 #if UNITY_STANDALONE || UNITY_EDITOR
-            if (Input.GetMouseButtonDown(0) && !Processing)
+            if (Input.GetMouseButton(0) && !Processing)
             {
                 RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
 
-                if (hit)
+                if (hit && !IsBlockClicked)
                 {
                     hit.transform.GetComponent<SpriteRenderer>().color = Color.gray;
                     GetClickedBlock(hit.transform.gameObject);
+                }
+                else if(hit)
+                {
+                    GetDestBlock(hit.transform.gameObject);
                 }
 
             }
             else if (Input.GetMouseButtonUp(0) && !Processing)
             {
-                RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
-
-                if (hit)
+                if(ValidDestBlock)
                 {
-                    GetButtonUpBlock(hit.transform.gameObject);
+                    GetButtonUpBlock();
                 }
                 else
                 {
                     Blocks[LastBlockPos.x, LastBlockPos.y].GetComponent<SpriteRenderer>().color = Color.white;
                     IsBlockClicked = false;
-                }
+                }                
             }
 #endif
 #if UNITY_ANDROID && !UNITY_EDITOR
@@ -86,13 +91,16 @@ public class Controller : MonoBehaviour
                             hit.transform.GetComponent<SpriteRenderer>().color = Color.gray;
                             GetClickedBlock(hit.transform.gameObject);
                             break;
+                        case TouchPhase.Moved:
+                            GetDestBlock(hit.transform.gameObject);
+                            break;
                         case TouchPhase.Ended:
                             Blocks[LastBlockPos.x, LastBlockPos.y].GetComponent<SpriteRenderer>().color = Color.white;
-                            GetButtonUpBlock(hit.transform.gameObject);
+                            GetButtonUpBlock();
                             break;
                         case TouchPhase.Canceled:
                             Blocks[LastBlockPos.x, LastBlockPos.y].GetComponent<SpriteRenderer>().color = Color.white;
-                            GetButtonUpBlock(hit.transform.gameObject);
+                            GetButtonUpBlock();
                             break;
                         default:
                             break;
@@ -100,10 +108,15 @@ public class Controller : MonoBehaviour
                 }
                 else
                 {
-                    if (touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled)
+                    if ((touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled) && !ValidDestBlock)
                     {
                         Blocks[LastBlockPos.x, LastBlockPos.y].GetComponent<SpriteRenderer>().color = Color.white;
                         IsBlockClicked = false;
+                    }
+                    else if(touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled && ValidDestBlock)
+                    {
+                        Blocks[LastBlockPos.x, LastBlockPos.y].GetComponent<SpriteRenderer>().color = Color.white;
+                        GetButtonUpBlock();
                     }
                 }
             }
@@ -201,7 +214,7 @@ public class Controller : MonoBehaviour
         }
     }
 
-    public void GetButtonUpBlock(GameObject Block)
+    void GetDestBlock(GameObject Block)
     {
         for (int i = 0; i < Width; i++)
         {
@@ -214,25 +227,36 @@ public class Controller : MonoBehaviour
                         if (((i == LastBlockPos.x - 1 || i == LastBlockPos.x + 1) && j == LastBlockPos.y) !=
                            ((j == LastBlockPos.y - 1 || j == LastBlockPos.y + 1) && i == LastBlockPos.x))
                         {
-                            IsBlockClicked = false;
-                            StartCoroutine(ReplaceValues(i, j, LastBlockPos.x, LastBlockPos.y, 0f));
-                            CheckHorizontalMatch(j);
-                            if (j != LastBlockPos.y)
-                                CheckHorizontalMatch(LastBlockPos.y);
-                            CheckVerticalMatch(i);
-                            if (i != LastBlockPos.x)
-                                CheckVerticalMatch(LastBlockPos.x);
-                            Debug.Log(MatchesCount);
-                            if (MatchesCount > 0)
-                                StartCoroutine(DeleteRepeated());
-                            else
-                                StartCoroutine(ReplaceValues(i, j, LastBlockPos.x, LastBlockPos.y, 0.5f));
+                            DestBlock = new Vector2Int(i, j);
+                            ValidDestBlock = true;
                         }
                     }
                 }
             }
         }
+    }
 
+    public void GetButtonUpBlock()
+    {
+        if (IsBlockClicked && ValidDestBlock)
+        {
+            IsBlockClicked = false;
+            StartCoroutine(ReplaceValues(DestBlock.x, DestBlock.y, LastBlockPos.x, LastBlockPos.y, 0f));
+            CheckHorizontalMatch(DestBlock.y);
+            if (DestBlock.y != LastBlockPos.y)
+                CheckHorizontalMatch(LastBlockPos.y);
+            CheckVerticalMatch(DestBlock.x);
+            if (DestBlock.x != LastBlockPos.x)
+                CheckVerticalMatch(LastBlockPos.x);
+            Debug.Log(MatchesCount);
+            if (MatchesCount > 0)
+                StartCoroutine(DeleteRepeated());
+            else
+                StartCoroutine(ReplaceValues(DestBlock.x, DestBlock.y, LastBlockPos.x, LastBlockPos.y, 0.5f));
+            ValidDestBlock = false;
+        }
+
+        ValidDestBlock = false;
         IsBlockClicked = false;
     }
 
