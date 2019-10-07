@@ -680,10 +680,10 @@ PlayerSettings:
   facebookXfbml: 0
   facebookFrictionlessRequests: 1
   apiCompatibilityLevel: 6
-  cloudProjectId: 
+  cloudProjectId: 750b16d9-aaf3-460c-8858-98a7297c7016
   framebufferDepthMemorylessMode: 0
-  projectName: 
-  organizationId: 
+  projectName: Match3
+  organizationId: fedepvg
   cloudEnabled: 0
   enableNativePlatformBackendsForNewInputSystem: 0
   disableOldInputManagerSupport: 0
