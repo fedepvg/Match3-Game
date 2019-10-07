@@ -9,6 +9,7 @@ public class AdManager : MonoBehaviour
     private string GameIdAndroid = "3317309";
     private string VideoKey = "video";
     private string RewardedKey = "rewardedVideo";
+    public AnalyticsManager AnMan;
 
     private void Awake()
     {
@@ -69,9 +70,11 @@ public class AdManager : MonoBehaviour
         {
             case ShowResult.Failed:
                 Debug.Log("El Ad Rewarded fallo");
+                AnMan.SawAd(false);
                 break;
             case ShowResult.Finished:
                 Debug.Log("El Ad Rewarded termino");
+                AnMan.SawAd(true);
                 break;
             case ShowResult.Skipped:
                 Debug.Log("El Ad Rewarded se skipeo");

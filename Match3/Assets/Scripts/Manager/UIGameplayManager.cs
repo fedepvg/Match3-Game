@@ -11,6 +11,7 @@ public class UIGameplayManager : MonoBehaviour
     public Controller GameController;
     public Text ScoreText;
     int LastScore;
+    public AnalyticsManager AnMan;
 
     private void Start()
     {
@@ -29,6 +30,7 @@ public class UIGameplayManager : MonoBehaviour
 
     public void GoToMenu()
     {
+        AnMan.FinishLevel(GameController.GetScore());
 #if UNITY_ANDROID && !UNITY_EDITOR
         GPSManager.Instance.UploadScore(GameController.GetScore());
         GPSManager.Instance.ShowLeaderboard();
